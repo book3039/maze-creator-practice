@@ -1,14 +1,17 @@
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
-public class MazeCreator {
+public class MazeGenerator {
 
     private static final int[] DY = {-1, 0, 1, 0};
     private static final int[] DX = {0, 1, 0, -1};
 
     public static void main(String[] args) {
-        MazeCreator mazeCreator = new MazeCreator(10, 10);
-        mazeCreator.create();
-        mazeCreator.print();
+        MazeGenerator mazeGenerator = new MazeGenerator(10, 10);
+        mazeGenerator.create();
+        mazeGenerator.print();
     }
 
     private final int[][] maze;
@@ -20,7 +23,7 @@ public class MazeCreator {
     private final int startY;
     private int depth;
 
-    public MazeCreator(int y, int x) {
+    public MazeGenerator(int y, int x) {
         maze = new int[y][x];
         visited = new boolean[y][x];
 
@@ -40,46 +43,44 @@ public class MazeCreator {
     }
 
     public void print() {
+        int maxDigits = String.valueOf(maxX * maxY).length();
+
         for (int[] row : maze) {
             for (int element : row) {
-                System.out.print(element + " ");
+                System.out.printf("%" + maxDigits + "d ", element);
             }
             System.out.println();
         }
     }
+
 
     public void create() {
         dfs(startX, startY);
     }
 
     private void dfs(int startX, int startY) {
-        int direction = generateRandomNumber(4);
-        int newX = startX + DX[direction];
-        int newY = startY + DY[direction];
 
-        if (!isValid(newX, newY)) {
-            for (int i = 0; i < 4; i++) {
-                newX = startX + DX[i];
-                newY = startY + DY[i];
+        visited[startX][startY] = true;
 
-                if (isValid(newX, newY)) {
-                    break;
-                }
+        List<Integer> directions = Arrays.asList(0, 1, 2, 3);
+        Collections.shuffle(directions);
+
+        for (int direction : directions) {
+            int newX = startX + DX[direction];
+            int newY = startY + DY[direction];
+
+            if (isValid(newX, newY)) {
+                maze[newY][newX] = depth++;
+
+                dfs(newX, newY);
             }
         }
 
-        if (!isValid(newX, newY)) {
-            return;
-        }
 
-        visited[newY][newX] = true;
-        maze[newY][newX] = depth++;
-
-        dfs(newX, newY);
     }
 
     private boolean isValid(int x, int y) {
-        return !(x < 0 || x >= maxX || y < 0 || y >= maxY || visited[y][x]);
+        return x >= 0 && x < maxX && y >= 0 && y < maxY && !visited[x][y];
     }
 
 }
